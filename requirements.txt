@@ -1,0 +1,19 @@
+loguru
+twisted
+dynaconf
+
+jsoncomment
+pyppeteer
+
+
+click
+SQLAlchemy ~= 1.4
+sqlservice
+
+click
+temp
+
+bs4
+
+
+requests
