@@ -23,26 +23,29 @@ class AbstractPlugin(ABC):
 		#
 		# return f'{clsmembers.__module__}.{clsmembers.__name__}'
 
-class PluginManager(object):
+class PluginManager():
 	"""Upon creation, this class will read the plugins package for modules
 	that contain a class definition that is inheriting from the Plugin class
 	"""
 	_plugins = {}
-	_baseclass = "AbstractPlugin"
+	_baseclass = None
 	
 	def __init__(self, plugin_package, baseclass=None):
 		"""Constructor that initiates the reading of all available plugins
 		when an instance of the PluginManager object is created
 		"""
+		self._plugins = {}
 		super().__init__()
 		self.plugin_package = plugin_package
+		if not baseclass:
+			raise AttributeError
 		if baseclass:
 			self._baseclass = baseclass
 		self.reload_plugins()
 
 	@property
 	def all(self):
-		return self._plugins
+		return self._plugins.copy()
 
 	def get_plugin(self, name):
 		if name not in self._plugins.keys():
@@ -112,3 +115,5 @@ class PluginManager(object):
 				for child_pkg in child_pkgs:
 					self._walk_package(package + '.' + child_pkg)
 
+		logger.debug(f'Found {len(self._plugins)} {self._baseclass} plugins:  {self._plugins}')
+		

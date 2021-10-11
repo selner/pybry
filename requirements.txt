@@ -1,10 +1,14 @@
+setuptools>=45.0
+
 loguru
 twisted
 dynaconf
 
+jsoncparser
 jsoncomment
 pyppeteer
 
+pillow
 
 click
 SQLAlchemy ~= 1.4

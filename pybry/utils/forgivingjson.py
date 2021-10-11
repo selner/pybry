@@ -1,15 +1,18 @@
 import uuid
 from datetime import date, timedelta, datetime
 from functools import partial
-
+import temp
 
 # from arrow import Arrow
 # from sqlalchemy import DateTime
 
 import json as basejson
+import jsonc
 
 from jsoncomment import JsonComment
 import os
+
+from pybry.utils.logutil import logger
 
 
 class ForgivingJSONDecoder(basejson.JSONDecoder):
@@ -164,7 +167,6 @@ class ForgivingJson(object):
 
     def __init__(self, sourcepath=None):
         if sourcepath:
-            import temp
             self._tmpfile = temp.tempfile() #
     #        self._tmpfile = tempfile.TemporaryFile(prefix=os.path.basename(__file__), suffix="loader")
             if os.path.isfile(sourcepath) or os.path.islink(sourcepath):
@@ -182,49 +184,74 @@ class ForgivingJson(object):
         if not ('cls' in kw and kw['cls']):
             kw['cls'] = ForgivingJSONEncoder
 
-        from json import dump
-        return dump(*args, **kw)
+        try:
+           return jsonc.dump(*args, **kw)
+        except Exception as ex:
+            logger.warning(f'Exception encoding data to JSON:  {ex}', exc=ex)
+            from json import dump
+            return dump(*args, **kw)
 
     @staticmethod
     def dumps(*args, **kw):
         if not ('cls' in kw and kw['cls']):
             kw['cls'] = ForgivingJSONEncoder
-        from json import dumps
-        return dumps( *args, **kw)
+        try:
+           return jsonc.dumps(*args, **kw)
+        except Exception as ex:
+            logger.warning(f'Exception encoding data to JSON:  {ex}', exc=ex)
+            from json import dumps
+            return dumps( *args, **kw)
 
-    @staticmethod
-    def dumpf(sourcepath, *args, **kwargs):
-        with open(sourcepath, "w") as fp:
-            jsc = JsonComment()
-            return jsc.dump(fp=fp, *args, **kwargs)
+    def dumpf(self, *args, **kwargs):
+        tfile = temp.tempfile()
+        with open(tfile, "w") as fp:
+            try:
+                basejson.dump(self._data, fp, cls=ForgivingJSONEncoder, *args, **kwargs)
+            except Exception as ex:
+                logger.warning(f'Exception encoding data to JSON:  {ex}', exc=ex)
+                jsc = JsonComment()
+                jsc.dump(self._data, fp=fp, *args, **kwargs)
+
+        return tfile
 
     @staticmethod
     def loadf(sourcepath, *args, **kw):
-        jsc = JsonComment()
         if not ('cls' in kw and kw['cls']):
             kw['cls'] = ForgivingJSONDecoder
-        return jsc.loadf(sourcepath, *args, **kw)
+        try:
+           return jsonc.load(fp=sourcepath, *args, **kw)
+        except Exception as ex:
+            logger.warning(f'Exception encoding data to JSON:  {ex}', exc=ex)
+
+            jsc = JsonComment()
+            return jsc.loadf(path=sourcepath, *args, **kw)
 
     @staticmethod
     def loads(*args, **kw):
         if not ('cls' in kw and kw['cls']):
             kw['cls'] = ForgivingJSONDecoder
+
+
         jsc = JsonComment()
 
         return jsc.loads(*args, **kw)
 
     @staticmethod
     def load(*args, **kw):
-        jsc = JsonComment()
-        return jsc.load(*args, **kw)
-
-    @staticmethod
-    def load_from_file(filepath, *args, **kw):
-        with open(filepath, "r") as fp:
-            jsonval = fp.read()
-
+        try:
+           return jsonc.load(*args, **kw)
+        except Exception as ex:
+            logger.warning(f'Exception encoding data to JSON:  {ex}', exc=ex)
             jsc = JsonComment()
-            return jsc.loads(jsonval, *args, **kw)
+            return jsc.load(*args, **kw)
 
+    # @staticmethod
+    # def load_from_file(filepath, *args, **kw):
+    #     with open(filepath, "r") as fp:
+    #         jsonval = fp.read()
+    #
+    #         jsc = JsonComment()
+    #         return jsc.loads(jsonval, *args, **kw)
+    #
 
 
