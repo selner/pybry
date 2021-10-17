@@ -1,6 +1,7 @@
 import functools
 import logging
 import time
+from pprint import pformat
 
 import loguru
 
@@ -103,3 +104,10 @@ loguru.logger.opt = functools.partial(loguru.logger.opt, exception=True)
 
 # If Loguru fails to retrieve the proper "name" value, assign it manually
 logger = loguru.logger.patch(lambda record: record.update(name=__name__))
+
+
+def ppformat(obj):
+    if obj:
+        return pformat(obj, indent=0 )
+    return ""
+
