@@ -1,4 +1,4 @@
-setuptools>=45.0
+setuptools
 
 loguru
 twisted

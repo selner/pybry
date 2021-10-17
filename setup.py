@@ -1,8 +1,6 @@
 # from pkg_resources import parse_requirements
 from setuptools import setup
 
-import setuptools
-
 def parse_requirements(filename):
     """Load requirements from a pip requirements file."""
     lineiter = (line.strip() for line in open(filename))
